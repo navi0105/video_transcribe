@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-l', '--url',
+        '-u', '--url',
         type=str,
         required=True
     )
@@ -52,7 +52,9 @@ def get_transcript(model: whisper.Whisper, audio_file: str, language: str='zh') 
     assert os.path.exists(audio_file)
     print(f"Transcrbing Audio File: {audio_file}")
     
-    transcript = model.transcribe(audio=audio_file, language=language)
+    transcript = model.transcribe(audio=audio_file, 
+                                  language=language,
+                                  initial_prompt="繁體中文")
     
     print("Finished.")
 
@@ -66,7 +68,7 @@ def main():
     if 'cuda' in device and torch.cuda.is_available() == False:
         device = 'cpu'
 
-    model = whisper.load_model(name=args.model).to(device)
+    model = whisper.load_model(name=args.model, device=device)
     temp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=True)
     
     try:
@@ -77,12 +79,7 @@ def main():
             json.dump(transcript, f, indent=4, ensure_ascii=False)
     finally:
         temp.close()
-
-
-
-
-
-    
+  
 
 
 if __name__ == "__main__":

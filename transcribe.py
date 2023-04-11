@@ -43,7 +43,9 @@ def get_transcript(model: whisper.Whisper, audio_file: str, language: str='zh') 
     assert os.path.exists(audio_file)
     print(f"Transcrbing Audio File: {audio_file}")
     
-    transcript = model.transcribe(audio=audio_file, language=language)
+    transcript = model.transcribe(audio=audio_file, 
+                                  language=language,
+                                  initial_prompt="繁體中文")
     
     print("Finished.")
 
@@ -59,7 +61,7 @@ def main():
     if 'cuda' in device and torch.cuda.is_available() == False:
         device = 'cpu'
 
-    model = whisper.load_model(name=args.model).to(device)
+    model = whisper.load_model(name=args.model, device=device)
 
     for audio_path in args.audio_files:
         audio_name = Path(audio_path).stem
