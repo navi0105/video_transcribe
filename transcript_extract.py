@@ -26,6 +26,14 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def _get_timestring(timestamp: float):
+    h = timestamp // 3600
+    timestamp %= 3600
+    m = timestamp // 60
+    s = timestamp % 60
+
+    return f"{int(h):02d}:{int(m):02d}:{s:02.0f}"
+
 def convert_transcript(file_path: str, output_dir: str, write_timestamp: bool=True) -> None:
     assert os.path.exists(file_path)
     print(f"Converting File: {file_path}")
@@ -38,7 +46,9 @@ def convert_transcript(file_path: str, output_dir: str, write_timestamp: bool=Tr
         for segment in tqdm(transcript['segments'], total=len(transcript['segments'])):
             row = ""
             if write_timestamp:
-                row += f"[{segment['start']} => {segment['end']}] "
+                start = _get_timestring(segment['start'])
+                end = _get_timestring(segment['end'])
+                row += f"[{start} => {end}] "
             row += segment['text']
 
             f.write(row + '\n')
