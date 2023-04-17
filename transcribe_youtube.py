@@ -53,8 +53,7 @@ def get_transcript(model: whisper.Whisper, audio_file: str, language: str='zh') 
     print(f"Transcrbing Audio File: {audio_file}")
     
     transcript = model.transcribe(audio=audio_file, 
-                                  language=language,
-                                  initial_prompt="繁體中文")
+                                  language=language,)
     
     print("Finished.")
 
