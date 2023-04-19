@@ -255,7 +255,8 @@ Double Christmas
 55
 00:02:08,000 --> 00:02:10,000
 你現在過得好嗎
-
-
-
 ```
+
+## TODO
+- [ ] Text Summarization
+- [ ] Frontend & Backend
