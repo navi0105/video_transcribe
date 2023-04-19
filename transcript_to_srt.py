@@ -14,8 +14,9 @@ def parse_args():
         nargs='+',
     )
     parser.add_argument(
-        '--write-timestamp',
-        action='store_true'
+        '-e', '--extension',
+        type=str,
+        default='.srt'
     )
     parser.add_argument(
         '--output-dir',
@@ -31,10 +32,14 @@ def _get_timestring(timestamp: float):
     timestamp %= 3600
     m = timestamp // 60
     s = timestamp % 60
+    ms = s - int(s)
 
-    return f"{int(h):02d}:{int(m):02d}:{s:02.0f}"
 
-def convert_transcript(file_path: str, output_dir: str, write_timestamp: bool=True) -> None:
+    return f"{int(h):02d}:{int(m):02d}:{int(s):02d},{int(ms * 1000):03d}"
+
+def convert_transcript(file_path: str, 
+                       file_extension: str, 
+                       output_dir: str) -> None:
     assert os.path.exists(file_path)
     print(f"Converting File: {file_path}")
 
@@ -42,16 +47,18 @@ def convert_transcript(file_path: str, output_dir: str, write_timestamp: bool=Tr
         transcript = json.load(f)
 
     file_name = Path(file_path).stem
-    with open(os.path.join(output_dir, f'{file_name}.txt'), 'w') as f:
-        for segment in tqdm(transcript['segments'], total=len(transcript['segments'])):
-            row = ""
-            if write_timestamp:
-                start = _get_timestring(segment['start'])
-                end = _get_timestring(segment['end'])
-                row += f"[{start} => {end}] "
-            row += segment['text']
+    with open(os.path.join(output_dir, (file_name + file_extension)), 'w') as f:
+        for idx, segment in enumerate(tqdm(transcript['segments'], total=len(transcript['segments']))):
+            info = ""
 
-            f.write(row + '\n')
+            start = _get_timestring(segment['start'])
+            end = _get_timestring(segment['end'])
+
+            info += f"{idx+1}\n"
+            info += f"{start} --> {end}\n"
+            info += segment['text']
+
+            f.write(info + '\n\n')
 
     print("Finished.")
 
@@ -61,9 +68,9 @@ def main():
     Path(args.output_dir).mkdir(exist_ok=True, parents=True)
 
     for file_path in args.transcript_files:
-        convert_transcript(file_path=file_path, 
-                           output_dir=args.output_dir, 
-                           write_timestamp=args.write_timestamp)
+        convert_transcript(file_path=file_path,
+                           file_extension=args.extension,
+                           output_dir=args.output_dir)
 
 if __name__ == "__main__":
     main()
