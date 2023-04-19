@@ -1,16 +1,22 @@
 import os
 import argparse
 import json
+import tempfile
 from pathlib import Path
+from tqdm import tqdm
 
 import torch
+import validators
 import whisper
+
+from module.whisper_model import TranscriptModel
+from utils.handler import extract_yt_audio, extract_audio, detect_type
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-f', '--audio-files',
+        '-f', '-u', '--files-or-urls',
         nargs='+'
     )
     parser.add_argument(
@@ -19,9 +25,9 @@ def parse_args():
         default='large',
     )
     parser.add_argument(
-        '--language',
-        type=str,
-        default='zh'
+        '--text-only',
+        type=bool,
+        default=False,
     )
     parser.add_argument(
         '--device',
@@ -33,22 +39,11 @@ def parse_args():
         type=str,
         default='transcript'
     )
-    
 
     args = parser.parse_args()
     return args
 
 
-def get_transcript(model: whisper.Whisper, audio_file: str, language: str='zh') -> dict:
-    assert os.path.exists(audio_file)
-    print(f"Transcrbing Audio File: {audio_file}")
-    
-    transcript = model.transcribe(audio=audio_file, 
-                                  language=language,)
-    
-    print("Finished.")
-
-    return transcript
 
 def main():
     args = parse_args()
@@ -60,15 +55,53 @@ def main():
     if 'cuda' in device and torch.cuda.is_available() == False:
         device = 'cpu'
 
-    model = whisper.load_model(name=args.model, device=device)
+    model = TranscriptModel(model_name=args.model,
+                                       device=device)
 
-    for audio_path in args.audio_files:
-        audio_name = Path(audio_path).stem
-        transcript = get_transcript(model, audio_path, args.language)
+    for file_or_url in tqdm(args.files_or_urls, total=len(args.files_or_urls)):
+        try:
+            use_temp = False
+            data_type = detect_type(file_or_url=file_or_url)
+
+            if data_type != 'yt':
+                assert os.path.exists(file_or_url)
+
+            audio_file = ''
+            audio_name = ''
+            if data_type == 'audio':
+                audio_file = file_or_url
+                audio_name = Path(audio_file).stem
+            else:
+                use_temp = True
+                temp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=True)
+                audio_file = temp.name                
+                # YouTube
+                if data_type == 'yt':
+                    url = file_or_url
+                    audio_name = extract_yt_audio(url=url, 
+                                             temp=temp,
+                                             return_title=True)
+                # Video
+                else:
+                    video_file = file_or_url
+                    audio_name = Path(video_file).stem
+                    extract_audio(video_file=video_file,
+                                  temp=temp)   
+
+            transcript = model.get_transcript(audio_file=audio_file, 
+                                              text_only=args.text_only)                         
+        finally:
+            if use_temp:
+                temp.close()
         
-        with open(os.path.join(args.output_dir, f'{audio_name}.json'), 'w') as f:
-            json.dump(transcript, f, indent=4, ensure_ascii=False)
-    
+        ext = '.txt' if args.text_only else '.json'
+        with open(os.path.join(args.output_dir, (audio_name + ext)), 'w') as f:
+            if args.text_only:
+                f.write(transcript)
+            else:
+                json.dump(transcript, f, indent=4, ensure_ascii=False)
+
+
 
 if __name__ == "__main__":
     main()
