@@ -10,7 +10,7 @@ Use `openai-whisper` tool to transcribe audio contents of video
 ### Transcribe files
 ```bash
 python transcribe.py \
-    -f <audio/video_file_or_YouTubeURL_1> <audio/video_file_or_YouTubeURL_2> ... <audio/video_file_or_YouTubeURL_N> \
+    -f <audio/video_file_or_YouTubeURL_1> <audio/video_file_or_YouTubeURL_2> ... <audio/video_file_or_YouTubeURL_n> \
     --model <model_name> \
     --output-dir <output_directory>
 ```
@@ -22,9 +22,20 @@ input of `--files-or-urls` accept `.mp4` / `.mp3` / `.wav` files and YouTube URL
 python transcribe.py -f your_audio_dir/audio.mp3 your_video_dir/video.mp4 <YouTube_URL>
 ```
 
-### Extract Text With Timestamp (SRT format)
+### Convert Transcribe File to SRT format file
 ```bash
-python transcript_to_srt.py -f transcript/* --output-dir ./srt
+python transcript_to_srt.py \
+    -f <transcript_file_1> <transcript_file_2> ... <transcript_file_n> \
+    --output-dir <output_directory>
+```
+
+### Text Summarize (Demostrative)
+You can execute `summarize.py` to get text summary of transcribe file text.
+But it may not a useful function currently... just a demostrative function right now.
+```bash
+python summarize.py \
+    -f <transcript_file_1> <transcript_file_2> ... <transcript_file_n> \
+    --output-dir <output_directory>
 ```
 
 ## Example
