@@ -3,3 +3,6 @@ moviepy
 pytube
 validators
 tqdm
+transformers
+sentencepiece
+protobuf==3.20
