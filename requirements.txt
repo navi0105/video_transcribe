@@ -1,9 +1,0 @@
-openai-whisper
-moviepy
-pytube
-validators
-tqdm
-transformers
-sentencepiece
-protobuf==3.21
-streamlit
