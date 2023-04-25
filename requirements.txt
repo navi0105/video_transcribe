@@ -1,0 +1,9 @@
+openai-whisper
+moviepy
+pytube
+validators
+tqdm
+transformers
+sentencepiece
+protobuf==3.20.2
+streamlit
