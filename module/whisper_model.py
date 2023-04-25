@@ -25,6 +25,7 @@ class TranscriptModel:
 
         language = self._detect_language(audio_file)
         transcript = self.model.transcribe(audio=audio_file,
+                                           task='transcribe',
                                            language=language)
 
         if text_only == True:

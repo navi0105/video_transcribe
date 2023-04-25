@@ -37,6 +37,21 @@ def _get_timestring(timestamp: float):
 
     return f"{int(h):02d}:{int(m):02d}:{int(s):02d},{int(ms * 1000):03d}"
 
+def get_info(segments: dict):
+    info = ""
+    for idx, segment in enumerate(tqdm(segments, total=len(segments))):
+        start = _get_timestring(segment['start'])
+        end = _get_timestring(segment['end'])
+
+        info += f"{idx+1}\n\n"
+        info += f"{start} --> {end}\n\n"
+        info += segment['text']
+        
+        if idx < len(segments) - 1:
+            info += '\n\n'
+    
+    return info
+
 def convert_transcript(file_path: str, 
                        file_extension: str, 
                        output_dir: str) -> None:
@@ -48,17 +63,8 @@ def convert_transcript(file_path: str,
 
     file_name = Path(file_path).stem
     with open(os.path.join(output_dir, (file_name + file_extension)), 'w') as f:
-        for idx, segment in enumerate(tqdm(transcript['segments'], total=len(transcript['segments']))):
-            info = ""
-
-            start = _get_timestring(segment['start'])
-            end = _get_timestring(segment['end'])
-
-            info += f"{idx+1}\n"
-            info += f"{start} --> {end}\n"
-            info += segment['text']
-
-            f.write(info + '\n\n')
+        info = get_info(transcript['segments'])
+        f.write(info)
 
     print("Finished.")
 

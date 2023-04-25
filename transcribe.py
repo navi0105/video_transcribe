@@ -6,8 +6,6 @@ from pathlib import Path
 from tqdm import tqdm
 
 import torch
-import validators
-import whisper
 
 from module.whisper_model import TranscriptModel
 from utils.handler import extract_yt_audio, extract_audio, detect_type

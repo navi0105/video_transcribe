@@ -7,6 +7,7 @@ import pytube
 import validators
 from moviepy.editor import VideoFileClip
 
+
 def extract_yt_audio(url: str,
                      temp: tempfile._TemporaryFileWrapper,
                      return_title: bool=True) -> Optional[str]:
@@ -18,12 +19,12 @@ def extract_yt_audio(url: str,
     if return_title:
         return yt.title
 
-def extract_audio(video_file: str, 
+def extract_audio(video_file, 
                   temp: tempfile._TemporaryFileWrapper):
     assert os.path.exists(video_file)
     print(f"Converting Video: {video_file}")
 
-    video = VideoFileClip(video_file)
+    video = VideoFileClip(video_file, audio_fps=16000)
     video.audio.write_audiofile(temp.name)
 
 def detect_type(file_or_url: str) -> str:
