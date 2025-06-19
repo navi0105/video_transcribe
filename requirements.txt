@@ -5,5 +5,5 @@ validators
 tqdm
 transformers
 sentencepiece
-protobuf==3.20.2
+protobuf==4.25.8
 streamlit
